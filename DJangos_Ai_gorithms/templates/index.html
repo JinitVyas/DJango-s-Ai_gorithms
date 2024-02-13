@@ -1,3 +1,4 @@
+{% comment %} {% load static %} {% endcomment %}
 <!doctype html>
 <html lang="en">
 
@@ -57,12 +58,7 @@
                         </div>
                     </li>
                 </ul>
-                <form class="d-flex my-2 my-lg-0">
-                    <input class="form-control me-sm-2" type="text" placeholder="Search" />
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-                        Search
-                    </button>
-                </form>
+                
             </div>
         </nav>
     </header>
@@ -70,22 +66,26 @@
         <div class="container-fluid d-flex align-items-center justify-content-center flex-column" style="
         background: linear-gradient(214deg, rgba(16,157,0,1) 36%, rgba(0,35,19,1) 100%);
         height:100vh;">
-            <div class="d-flex align-items-center">
+            {% comment %} <img src={% static '/images/logo.png' %}> {% endcomment %}
+            <div class="d-flex align-items-center flex">
                 <h1 class="text-light" id="welcome-msg" style="
                 font-family:'Raleway', sans-serif;
                 white-space: pre-line;
                 ">
+                </h1>
             </div>
-            </h1>
                 <div class="mb-3">
                     <input type="text" name="txtsongs" id="txtsongs" class="form-control"
                         placeholder="Enter a song name" aria-describedby="helpId" />
-                        <select id="songDropdown" class="form-control"></select>
+                        <select id="songDropdown" class="form-control hide"></select>
                 </div>
+
                 {% if request.session.api__token %}
                     <p>API Token: {{ request.session.api__token }}</p>
                     <script>
                         $(document).ready(function(){
+
+                            // on text change of song name
                             $('#txtsongs').on('input',function(){
                                 //alert("YO");
                                 const s_name = $("#txtsongs").val()
@@ -99,8 +99,8 @@
                                         q:s_name
                                     },
                                     success:function(data){
-                                        console.log("nachoo beeeee");
-                                        console.log(data["tracks"]["items"]);
+                                        //console.log("nachoo beeeee");
+                                        //console.log(data["tracks"]["items"]);
                                         
                                         if( (typeof data === "object" || typeof data === 'function') && (data !== null) )
                                         {
@@ -142,8 +142,9 @@
                                     }
                                 });
                             });
-                            // The code for 
 
+                            // The code for Selection change
+                            /*
                             $("#songDropdown").on('change',function(){
                                 //alert("yo");
                                 var [track_id , artist_id] = $("#songDropdown").val().split("+++")
@@ -178,7 +179,7 @@
                                 });
 
                                 var target = []
-
+                                console.log(track_id)
                                 // to fetch the fatures of target track i.e. user's input
                                 $.ajax({
                                     url:"features",
@@ -209,8 +210,8 @@
                                         //var requests = []
                                         var results = []
                                         console.log(data.tracks.length)
-                                        //for (var i = 0; i < data.tracks.length; i++) {
-                                        for(var i = 0; i < data.tracks.length; i++) {
+                                        for (var i = 0; i < data.tracks.length; i++) {
+                                        //for(var i = 0; i < 1; i++) {
                                             var track = data.tracks[i];
                                             //console.log("track id : "+track.id)
                                         
@@ -236,8 +237,12 @@
                                                     track_id:track.id
                                                 },
                                                 success:function(data){
-                                                    results.push(data)
-                                                    console.log(data)
+                                                    var result = {
+                                                        energy : data.energy,
+                                                        loudness : data.loudness
+                                                    }
+                                                    results.push(result)
+                                                    console.log(data.energy)
                                                 },
                                                 error:function(error){
                                                     console.log(error)
@@ -246,37 +251,174 @@
                                             // for features data retrival
                                             
                                         } // end for loop
+                                        var tracks_features = results
+                                        console.log("recommendations")
                                         console.dir(recommendations)
+                                        console.log("target")
                                         console.dir(target)
-                                        console.dir("Features results : "+results)
-                                        localStorage.setItem('recommendationsData', recommendations);
-                                        localStorage.setItem('featuresData', results);
+                                        console.log("results: ")
+                                        console.log(results)
+                                        localStorage.setItem('recommendationsData', JSON.stringify(recommendations));
+                                        localStorage.setItem('featuresData', JSON.stringify(results));
 
                                         // Finlly feeding all the required data to the model
+                                        //console.log(results)
                                         $.ajax({
                                             url:"filterout",
-                                            type:"POST",
+                                            type:"GET",
                                             dataType:"json",
                                             data:{
-                                                csrfmiddlewaretoken:"{{csrf_token}}",
-                                                _target_track : jaruri_data,
-                                                _target_features : target,
-                                                _100tracks : recommendations,
-                                                _100features : results
+                                                f1 : jaruri_data,
+                                                f2 : target,
+                                                f3 : recommendations,
+                                                f4 : tracks_features,
+                                                csrfmiddlewaretoken:"{{csrf_token}}"
                                             },
-                                            success:function(){
-                                                console.log("Aage ki kahani model me... ;)")
+                                            success:function(data){
+                                                console.log("Aage ki kahani model me... ;)"+data)
                                             },
-                                            error:function(){
+                                            error:function(error){
                                                 console.log("Jaane nahiiii, denge tujheeee...")
+                                                console.dir(error)
                                             }
                                         });
+                                        
                                     },
                                     error:function(xhr,status,error){
                                         console.log(error)
                                     }
                                 });
                             });
+                            */
+                            
+                            $("#songDropdown").on('change', function() {
+                                var [track_id, artist_id] = $("#songDropdown").val().split("+++");
+                                var target_track = [];
+                            
+                                $.ajax({
+                                    url: "https://api.spotify.com/v1/tracks/" + track_id,
+                                    type: "GET",
+                                    dataType: "json",
+                                    headers: {
+                                        'Authorization': 'Bearer {{request.session.api__token}}'
+                                    },
+                                    success: function(data) {
+                                        var jaruri_data = {
+                                            track_id: data.id,
+                                            track_name: data.name,
+                                            duration_ms: data.duration_ms,
+                                            artist_name: data.artists[0].name,
+                                            album_name: data.album.name,
+                                            preview_url: data.preview_url,
+                                            external_urls: data.external_urls,
+                                            uri: data.uri
+                                        };
+                                        target_track.push(jaruri_data);
+                            
+                                        // Fetch features of target track
+                                        $.ajax({
+                                            url: "features",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: {
+                                                csrfmiddlewaretoken: "{{csrf_token}}",
+                                                track_id: track_id,
+                                            },
+                                            success: function(target_data) {
+                                                // Fetch recommendations
+                                                $.ajax({
+                                                    url: "recommend",
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: {
+                                                        csrfmiddlewaretoken: "{{csrf_token}}",
+                                                        track_id: track_id,
+                                                        artist_id: artist_id
+                                                    },
+                                                    success: function(recommend_data) {
+                                                        var recommendations = [];
+                                                        var results = [];
+                                                        for (var i = 0; i < recommend_data.tracks.length; i++) {
+                                                            var track = recommend_data.tracks[i];
+                                                            var recommendation = {
+                                                                track_id: track.id,
+                                                                track_name: track.name,
+                                                                duration_ms: track.duration_ms,
+                                                                artist_name: track.artists[0].name,
+                                                                album_name: track.album.name,
+                                                                preview_url: track.preview_url,
+                                                                external_urls: track.external_urls,
+                                                                uri: track.uri
+                                                            };
+                                                            recommendations.push(recommendation);
+                                                        }
+                            
+                                                        // Fetch features of recommended tracks
+                                                        var promises = recommendations.map(function(track) {
+                                                            return $.ajax({
+                                                                url: 'features',
+                                                                type: 'POST',
+                                                                dataType: 'json',
+                                                                data: {
+                                                                    csrfmiddlewaretoken: "{{csrf_token}}",
+                                                                    track_id: track.track_id
+                                                                }
+                                                            });
+                                                        });
+                            
+                                                        // Wait for all feature requests to finish
+                                                        $.when.apply($, promises).done(function() {
+                                                            // Convert arguments to array
+                                                            var results = Array.prototype.slice.call(arguments);
+                                                            var tracks_features = results.map(function(result) {
+                                                                return result[0];
+                                                            });
+                                                            console.dir(jaruri_data)
+                                                            console.dir(target_data)
+                                                            console.dir(recommendations)
+                                                            console.dir(tracks_features)
+                                                            // Send data to Django view
+                                                            $.ajax({
+                                                                url: "filterout",
+                                                                type: "POST",
+                                                                dataType: "json",
+                                                                data: {
+                                                                    f1: JSON.stringify(jaruri_data), 
+                                                                    f2: JSON.stringify(target_data),
+                                                                    f3: JSON.stringify(recommendations),
+                                                                    f4: JSON.stringify(tracks_features),
+                                                                    csrfmiddlewaretoken: "{{csrf_token}}"
+                                                                },
+                                                                success: function(data) {
+                                                                    console.log("Data sent successfully to Django view");
+                                                                },
+                                                                error: function(error) {
+                                                                    console.log("Error sending data to Django view");
+                                                                    console.dir(error);
+                                                                }
+                                                            });
+                                                        });
+                                                    },
+                                                    error: function(error) {
+                                                        console.log("Error fetching recommendations");
+                                                        console.dir(error);
+                                                    }
+                                                });
+                                            },
+                                            error: function(error) {
+                                                console.log("Error fetching target track features");
+                                                console.dir(error);
+                                            }
+                                        });
+                                    },
+                                    error: function(error) {
+                                        console.log("Error fetching track details");
+                                        console.dir(error);
+                                    }
+                                });
+                            });
+                            
+                            
                         });
                     </script>
                 {% else %}

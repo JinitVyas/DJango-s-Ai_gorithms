@@ -11,4 +11,4 @@ urlpatterns = [
     path('features',views.run_get_features),
     path('filterout',views.run_get_top10),
     path('end',views.end)
-] 
+]
