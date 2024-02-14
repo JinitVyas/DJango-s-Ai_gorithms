@@ -80,9 +80,7 @@ def run_get_top10(request):
                 f1 = json.loads(TargetInfo)
                 print(f1)
                 Call.get_top10(targetFeatures=TargetFeatures,target_track=TargetInfo,_100Features=RecommendedFeatures,_100Tracks=RecommendedInfo)
-                # Process the loaded JSON data
-                # For example, you can access individual fields using f1['field_name']
-                # Replace the below return statement with your actual processing logic
+
                 return JsonResponse({"message": "Data received successfully", "f1": f1})
             except json.JSONDecodeError:
                 return JsonResponse({"error": "Invalid JSON data in 'f1'"}, status=400)

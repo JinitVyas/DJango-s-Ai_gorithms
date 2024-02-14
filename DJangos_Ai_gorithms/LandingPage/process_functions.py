@@ -91,22 +91,11 @@ class Call:
             return result.status_code
 
     def get_top10(targetFeatures, target_track, _100Features, _100Tracks):
-        # print(f'''\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
-        #     {targetFeatures}****************************\n
-        #     {target_track}***************************\n
-        #     {_100Features}***************************\n
-        #     {_100Tracks}***************************
-        #     \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
-        #     ''')
-
 
         target_track = json.loads(target_track)
         targetFeatures = json.loads(targetFeatures)
         _100Features = json.loads(_100Features)
         _100Tracks = json.loads(_100Tracks)
-
-        # print("**********\n",_100Tracks)
-        # print("**********\n",target_track)
 
         # Convert to DataFrame
         target_track_df = pd.DataFrame([target_track])
@@ -115,14 +104,34 @@ class Call:
         _100Tracks_df = pd.DataFrame([_100Tracks])
 
         # print(_100Features_df.columns)
-        print("",_100Tracks_df.columns,"\n\n\n\n\\n")
+        dfs = []
+        dfs2 = []
+        for key, val in _100Features_df.items():
+            print(val[0])  # Append the DataFrame to the list
+            dfs.append(dict(val[0]))  # Append the DataFrame to the list
+
+        for key, val in _100Tracks_df.items():
+            print(val[0])  # Append the DataFrame to the list
+            dfs2.append(dict(val[0]))  # Append the DataFrame to the list
+
+        # print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
+        # Concatenate DataFrames vertically
+        other_Features_df = pd.DataFrame(dfs)
+        other_tracks_df = pd.DataFrame(dfs)
+        # print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
+        # print(other_Features_df)
+        # print(other_tracks_df.columns)
+        # print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
 
         target_df_merged = pd.merge(target_track_df, targetFeatures_df, left_on='track_id', right_on='id')
-        data_df_merged = pd.merge(_100Tracks_df, _100Features_df, left_on='track_id', right_on='id')
+        data_df_merged = pd.merge(other_tracks_df, other_Features_df, left_on='id', right_on='id')
 
         # Print the merged DataFrame
-        print("MERGED")
-        print(df_merged)
+        # print("MERGED")
+        # print(data_df_merged.shape)
 
         target_df_merged.to_csv("static/TargetTrack.csv", index=False, encoding='utf-8', sep=',')
         data_df_merged.to_csv("static/_100Track.csv", index=False, encoding='utf-8', sep=',')
