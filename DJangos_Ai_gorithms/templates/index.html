@@ -31,6 +31,31 @@
             display: block; /* or inline-block, flex, etc., based on your layout requirements */
         }
     </style>
+
+    <style>
+        /* Styling for the buffering animation */
+        #bufferingAnimation {
+            display: none; /* Initially hide the animation */
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3; /* Light grey border */
+            border-top: 5px solid #3498db; /* Blue border on top */
+            border-radius: 50%; /* Make it a circle */
+            animation: spin 1s linear infinite; /* Spin animation */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -25px; /* Center vertically */
+            margin-left: -25px; /* Center horizontally */
+        }
+    
+        /* Keyframes for the spin animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
 </head>
 
 <body>
@@ -83,7 +108,7 @@
                 </div>
 
                 {% if request.session.api__token %}
-                    <p>API Token: {{ request.session.api__token }}</p>
+                    {% comment %} <p>API Token: {{ request.session.api__token }}</p> {% endcomment %}
                     <script>
                         $(document).ready(function(){
 
@@ -150,7 +175,9 @@
                             $("#songDropdown").on('change', function() {
                                 var [track_id, artist_id] = $("#songDropdown").val().split("+++");
                                 var target_track = [];
-                            
+                                
+                                $('#bufferingAnimation').show();
+
                                 $.ajax({
                                     url: "https://api.spotify.com/v1/tracks/" + track_id,
                                     type: "GET",
@@ -161,6 +188,7 @@
                                     success: function(data) {
                                         var jaruri_data = {
                                             track_id: data.id,
+                                            image_url: data.album.images[0].url,
                                             track_name: data.name,
                                             duration_ms: data.duration_ms,
                                             artist_name: data.artists[0].name,
@@ -170,7 +198,7 @@
                                             uri: data.uri
                                         };
                                         target_track.push(jaruri_data);
-                            
+                                        console.dir(target_track)
                                         // Fetch features of target track
                                         $.ajax({
                                             url: "features",
@@ -198,6 +226,7 @@
                                                             var track = recommend_data.tracks[i];
                                                             var recommendation = {
                                                                 track_id: track.id,
+                                                                image_url: track.album.images[0].url,
                                                                 track_name: track.name,
                                                                 duration_ms: track.duration_ms,
                                                                 artist_name: track.artists[0].name,
@@ -246,11 +275,115 @@
                                                                     csrfmiddlewaretoken: "{{csrf_token}}"
                                                                 },
                                                                 success: function(data) {
-                                                                    console.log("Data sent successfully to Django view");
+                                                                    console.log("success");
+                                                                    console.log(data);
+
+
+                                                                    var containerDiv = document.getElementById('songContainer');
+
+                                                                    // Iterate over the top 10 IDs
+                                                                    // Assuming data["top10"] contains the top 10 song IDs and recommendations contains the recommendation data
+
+                                                                    function appendSongDiv(songData) {
+                                                                        // Create a new div element for the song
+                                                                        var songDiv = document.createElement('div');
+                                                                    
+                                                                        // Create an image element for the song
+                                                                        var img = document.createElement('img');
+                                                                        img.src = songData.image_url; 
+                                                                        img.width = 250; 
+                                                                        img.height = 250; 
+                                                                    
+                                                                        // Create a paragraph element for the song name
+                                                                        var songInnerDiv = document.createElement('div');
+
+                                                                        var p = document.createElement('p');
+                                                                        p.textContent = songData.track_name; 
+                                                                        var p2 = document.createElement('p');
+                                                                        p2.textContent = "by - "+songData.artist_name;
+                                                                        var p3 = document.createElement('p');
+                                                                        duration = songData.duration_ms / 60000;
+                                                                        p3.textContent = "Duration - "+duration.toFixed(2)+" Minutes";
+                                                                        var p4 = document.createElement('p');
+                                                                        p4.textContent = songData.album_name;
+
+                                                                    
+                                                                        // Append the image and paragraph elements to the song div
+                                                                        songInnerDiv.appendChild(p);
+                                                                        songInnerDiv.appendChild(p2);
+                                                                        songInnerDiv.appendChild(p3);
+                                                                        songInnerDiv.appendChild(p4);
+                                                                        songDiv.appendChild(img);
+                                                                        songDiv.appendChild(songInnerDiv);
+                                                                    
+                                                                        // Append the song div to the container div
+                                                                        containerDiv.innerHTML = '';
+                                                                        containerDiv.appendChild(songDiv);
+                                                                    }
+                                                                    
+                                                                    // Show buffering animation
+                                                                    $('#bufferingAnimation').show();
+                                                                    
+                                                                    // Append target song's information
+                                                                    appendSongDiv(jaruri_data); // Assuming jaruri_data contains target song's info
+                                                                    
+
+
+
+                                                                    data["top10"].forEach(function(songId) {
+                                                                        // Retrieve song data from recommendations based on songId
+                                                                        var songData = recommendations.find(function(item) {
+                                                                            //console.log(item)
+                                                                            return item.track_id === songId;
+                                                                        });
+
+                                                                        // Check if songData is found
+                                                                        if (songData) {
+                                                                            // Create a new div element for the song
+                                                                            var songDiv = document.createElement('div');
+
+                                                                            // Create an image element for the song
+                                                                            var img = document.createElement('img');
+                                                                            img.src = songData.image_url; 
+                                                                            img.width = 100; // Set the width of the image
+                                                                            img.height = 100
+
+                                                                            // Create a paragraph element for the song name
+                                                                            
+                                                                            var songInnerDiv = document.createElement('div');
+
+                                                                            var p = document.createElement('p');
+                                                                            p.textContent = songData.track_name; // Assuming track_name is the name of the song
+                                                                            var p2 = document.createElement('p');
+                                                                            p2.textContent = "by - "+songData.artist_name;
+                                                                            var p3 = document.createElement('p');
+                                                                            duration = songData.duration_ms / 60000;
+                                                                            p3.textContent = "Duration - "+duration.toFixed(2)+" Minutes";
+                                                                            var p4 = document.createElement('p');
+                                                                            p4.textContent = songData.album_name;
+
+
+                                                                            // Append the image and paragraph elements to the song div
+                                                                            songInnerDiv.appendChild(p);
+                                                                            songInnerDiv.appendChild(p);
+                                                                            songInnerDiv.appendChild(p2);
+                                                                            songInnerDiv.appendChild(p3);
+                                                                            songInnerDiv.appendChild(p4);
+                                                                            songDiv.appendChild(img);
+                                                                            songDiv.appendChild(songInnerDiv);
+                                                                            // Append the song div to the container div
+                                                                            containerDiv.appendChild(songDiv);
+                                                                        }
+                                                                    });
+
+                                                                    // Hide buffering animation after appending song divs
+                                                                    $('#bufferingAnimation').hide();
+
                                                                 },
                                                                 error: function(error) {
                                                                     console.log("Error sending data to Django view");
                                                                     console.dir(error);
+                                                                    $('#bufferingAnimation').hide();
                                                                 }
                                                             });
                                                         });
@@ -258,23 +391,24 @@
                                                     error: function(error) {
                                                         console.log("Error fetching recommendations");
                                                         console.dir(error);
+                                                        $('#bufferingAnimation').hide();
                                                     }
                                                 });
                                             },
                                             error: function(error) {
                                                 console.log("Error fetching target track features");
                                                 console.dir(error);
+                                                $('#bufferingAnimation').hide();
                                             }
                                         });
                                     },
                                     error: function(error) {
                                         console.log("Error fetching track details");
                                         console.dir(error);
+                                        $('#bufferingAnimation').hide();
                                     }
                                 });
                             });
-                            
-                            
                         });
                     </script>
                 {% else %}
@@ -287,12 +421,16 @@
             
         </div>
     </main>
+    <div id="songContainer" class="container-fluid">
+
+    </div>
     <footer>
         <!-- place footer here -->
     </footer>
 
 
     <!-- type animation -->
+    <div id="bufferingAnimation"></div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Set up Typed.js

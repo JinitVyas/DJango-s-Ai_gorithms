@@ -24,7 +24,7 @@ def run_get_recommendation(request):
     seed_track = request.POST.get('track_id')
     seed_artist = request.POST.get('artist_id')
     token = request.session['api__token']
-    result_recommendation = Call.get_recommendation(limit=10, seed_track=seed_track, seed_artist=seed_artist,token=token )
+    result_recommendation = Call.get_recommendation(limit=50, seed_track=seed_track, seed_artist=seed_artist,token=token )
 
     return JsonResponse(result_recommendation)
 
@@ -36,39 +36,6 @@ def run_get_features(request):
     # print(result)
     return JsonResponse(result)
 
-# def run_get_top10(request):
-#     f1 = json.loads(request.POST.get('f1'))
-#     f2 = request.POST.get('f2')
-#     f3 = request.POST.get('f3')
-#     f4 = request.POST.get('f4')
-    
-#     print(f'''#################################################################################################
-#         #################################################################################################
-#     ''')
-#     if f1 is not None:
-#         # Convert data to JSON
-#         json_data = json.dumps(f1)
-#         return JsonResponse(json_data, safe=False)
-#     else:
-#         # Handle the case where data is None
-#         return JsonResponse({"error": "Data is None"}, status=400)
-#     # print(f1)
-#     # for key, value in request.POST.items():
-#     #     print(f"{key}: {value}")
-#     print(f'''#################################################################################################
-#         #################################################################################################
-#     ''')
-
-#     # response = Call.get_top10(
-#     #     targetFeatures=f1,
-#     #     target_track=f2,
-#     #     _100Features=f3,
-#     #     _100Tracks=f4
-#     # )
-#     # response2 = response.to_json(orient='records')
-#     return JsonResponse(f2,safe=False)
-
-
 def run_get_top10(request):
     if request.method == 'POST' and 'f1' in request.POST:
         TargetInfo = request.POST.get('f1')
@@ -77,11 +44,11 @@ def run_get_top10(request):
         RecommendedFeatures = request.POST.get('f4')
         if TargetInfo:
             try:
-                f1 = json.loads(TargetInfo)
-                print(f1)
-                Call.get_top10(targetFeatures=TargetFeatures,target_track=TargetInfo,_100Features=RecommendedFeatures,_100Tracks=RecommendedInfo)
+                f1 = json.loads(RecommendedInfo)
+                # print(f1)
+                top_10_ids = Call.get_top10(targetFeatures=TargetFeatures,target_track=TargetInfo,_100Features=RecommendedFeatures,_100Tracks=RecommendedInfo).tolist()
 
-                return JsonResponse({"message": "Data received successfully", "f1": f1})
+                return JsonResponse({"message": "Data received successfully", "top10": top_10_ids})
             except json.JSONDecodeError:
                 return JsonResponse({"error": "Invalid JSON data in 'f1'"}, status=400)
         else:

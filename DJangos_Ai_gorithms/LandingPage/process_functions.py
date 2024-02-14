@@ -7,6 +7,8 @@ from requests import post
 import json
 from django.shortcuts import render, HttpResponse
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 class Call:    
     def get_token():
@@ -103,35 +105,75 @@ class Call:
         _100Features_df = pd.DataFrame([_100Features])
         _100Tracks_df = pd.DataFrame([_100Tracks])
 
-        # print(_100Features_df.columns)
         dfs = []
         dfs2 = []
         for key, val in _100Features_df.items():
-            print(val[0])  # Append the DataFrame to the list
+            # print(val[0])  # Append the DataFrame to the list
             dfs.append(dict(val[0]))  # Append the DataFrame to the list
 
         for key, val in _100Tracks_df.items():
-            print(val[0])  # Append the DataFrame to the list
+            # print(val[0])  # Append the DataFrame to the list
             dfs2.append(dict(val[0]))  # Append the DataFrame to the list
 
-        # print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 
         # Concatenate DataFrames vertically
         other_Features_df = pd.DataFrame(dfs)
-        other_tracks_df = pd.DataFrame(dfs)
-        # print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+        other_tracks_df = pd.DataFrame(dfs2)
 
-        # print(other_Features_df)
-        # print(other_tracks_df.columns)
-        # print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+        # target_track_df.to_csv("static/target_track_df.csv", index=False, encoding='utf-8', sep=',')
+        # targetFeatures_df.to_csv("static/targetFeatures_df.csv", index=False, encoding='utf-8', sep=',')
+        # other_tracks_df.to_csv("static/other_tracks_df.csv", index=False, encoding='utf-8', sep=',')
+        # other_Features_df.to_csv("static/other_Features_df.csv", index=False, encoding='utf-8', sep=',')
 
 
-        target_df_merged = pd.merge(target_track_df, targetFeatures_df, left_on='track_id', right_on='id')
-        data_df_merged = pd.merge(other_tracks_df, other_Features_df, left_on='id', right_on='id')
+        # ML MODEL FOR RECOMMENDATION
+        # Setting Id as index for both DataFrames
+        other_Features_df = other_Features_df.set_index('id')
+        targetFeatures_df = targetFeatures_df.set_index('id')
 
-        # Print the merged DataFrame
-        # print("MERGED")
-        # print(data_df_merged.shape)
+        # Removing unneccesrary features
+        useless_features = ['type', 'track_href', 'analysis_url', 'uri']
+        other_Features_df.drop(columns=useless_features, inplace=True)
+        targetFeatures_df.drop(columns=useless_features, inplace=True)
 
-        target_df_merged.to_csv("static/TargetTrack.csv", index=False, encoding='utf-8', sep=',')
-        data_df_merged.to_csv("static/_100Track.csv", index=False, encoding='utf-8', sep=',')
+        # Dropping Null Values
+        targetFeatures_df.dropna()
+        other_Features_df.dropna()
+
+        # Convert duration from milliseconds to seconds
+        other_Features_df['duration_sec'] = other_Features_df['duration_ms'] / 1000
+        targetFeatures_df['duration_sec'] = targetFeatures_df['duration_ms'] / 1000
+
+        # Drop the original 'duration_ms' column if needed
+        other_Features_df.drop(columns=['duration_ms'], inplace=True)
+        targetFeatures_df.drop(columns=['duration_ms'], inplace=True)
+
+        '''
+            # The actual model that filtersout top 10 songs out of 100
+        '''
+        # Calculate cosine similarity between target and other songs
+        similarities = cosine_similarity(targetFeatures_df.values.reshape(1, -1), other_Features_df.values)
+        # print(similarities)
+
+
+        # Flatten the similarities array
+        similarities = similarities.flatten()
+
+        # Create a new column in other_Features_df to store the similarity scores
+        other_Features_df['similarity'] = similarities
+
+        # Sort the dataframe by similarity score in descending order
+        other_Features_df = other_Features_df.sort_values(by='similarity', ascending=False)
+
+        # Get the top 10 most similar songs
+        top_10_similar_songs = other_Features_df.head(10)
+
+        # Reset the index if needed
+        # top_10_similar_songs = top_10_similar_songs.reset_index()
+        
+        # Index of top 10 songs
+        top_10_index = top_10_similar_songs.index
+        print(top_10_index)
+        return top_10_index
+        # Print the top 10 similar songs
+        # print(top_10_similar_songs)
