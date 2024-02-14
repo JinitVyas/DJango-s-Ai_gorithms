@@ -1,0 +1,22 @@
+@keyframes moveRight {
+    0% {
+        transform: translateX(0) rotateY('0%');
+    }
+    
+    40%{
+        transform: translateX(0) rotateY('100%');
+    }
+    
+    50%{
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(100vw - 90vw));
+    }
+}
+.animate-right {
+    animation: moveRight 1.5s ease-out 0.5s forwards;
+    /* animation: moveRight 1s ease-in-out 1.5s forwards; */
+    /* 2s delay before animation starts */
+}

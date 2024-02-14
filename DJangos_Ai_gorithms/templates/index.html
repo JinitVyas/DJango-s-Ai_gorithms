@@ -1,4 +1,4 @@
-{% comment %} {% load static %} {% endcomment %}
+{% load static %}
 <!doctype html>
 <html lang="en">
 
@@ -34,7 +34,7 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark p-3 position-fixed w-100">
-            <a class="navbar-brand" href="#"><b>DJ</b>ango's <b>Ai</b>gorithms</a>
+            <a class="navbar-brand" href="#"><b>B</b>eat<b>B</b>uddy</a>
             <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
         <div class="container-fluid d-flex align-items-center justify-content-center flex-column" style="
         background: linear-gradient(214deg, rgba(16,157,0,1) 36%, rgba(0,35,19,1) 100%);
         height:100vh;">
-            {% comment %} <img src={% static '/images/logo.png' %}> {% endcomment %}
+            <img src="{% static '/images/logo.png' %}" class="animate-right" height="100px">
             <div class="d-flex align-items-center flex">
                 <h1 class="text-light" id="welcome-msg" style="
                 font-family:'Raleway', sans-serif;
@@ -144,152 +144,6 @@
                             });
 
                             // The code for Selection change
-                            /*
-                            $("#songDropdown").on('change',function(){
-                                //alert("yo");
-                                var [track_id , artist_id] = $("#songDropdown").val().split("+++")
-                                //alert(artist_id);
-                                var target_track = []
-
-                                $.ajax({
-                                    url:"https://api.spotify.com/v1/tracks/"+track_id,
-                                    type:"GET",
-                                    dataType:"json",
-                                    headers:{
-                                        'Authorization': 'Bearer {{request.session.api__token}}'
-                                    },
-                                    success:function(data){
-                                        console.log("target: ")
-                                        jaruri_data = {
-                                            track_id : data.id,
-                                            track_name : data.name,
-                                            duration_ms : data.duration_ms,
-                                            artist_name : data.artists[0].name,
-                                            album_name : data.album.name,
-                                            preview_url : data.preview_url,
-                                            external_urls : data.external_urls,
-                                            uri : data.uri
-                                        }
-                                        console.dir(jaruri_data)
-                                        target_track.push(jaruri_data)
-                                    },
-                                    error:function(error){
-                                        console.log(error)
-                                    }
-                                });
-
-                                var target = []
-                                console.log(track_id)
-                                // to fetch the fatures of target track i.e. user's input
-                                $.ajax({
-                                    url:"features",
-                                    type:"POST",
-                                    dataType:"json",
-                                    data:{
-                                        csrfmiddlewaretoken:"{{csrf_token}}",
-                                        track_id:track_id,
-                                    },success:function(data){
-                                        target.push(data)
-                                    },error:function(error){
-                                        console.log(error)
-                                    }
-                                });
-
-                                $.ajax({
-                                    url:"recommend",
-                                    type:"POST",
-                                    dataType:"json",
-                                    data:{
-                                        csrfmiddlewaretoken:"{{csrf_token}}",
-                                        track_id:track_id,
-                                        artist_id:artist_id
-                                    },
-                                    success:function(data){
-                                        console.log("Tracks data on outer success: "+ data);
-                                        var recommendations = []
-                                        //var requests = []
-                                        var results = []
-                                        console.log(data.tracks.length)
-                                        for (var i = 0; i < data.tracks.length; i++) {
-                                        //for(var i = 0; i < 1; i++) {
-                                            var track = data.tracks[i];
-                                            //console.log("track id : "+track.id)
-                                        
-                                            // Extract details for the current track
-                                            var recommendation = {
-                                                track_id : track.id,
-                                                track_name : track.name,
-                                                duration_ms : track.duration_ms,
-                                                artist_name : track.artists[0].name,
-                                                album_name : track.album.name,
-                                                preview_url : track.preview_url,
-                                                external_urls : track.external_urls,
-                                                uri : track.uri
-                                            }
-                                            recommendations.push(recommendation)
-                                            //console.log("Recommendation :"+i+" "+recommendation)
-                                            $.ajax({
-                                                url: 'features',
-                                                type: 'POST',
-                                                dataType: 'json',
-                                                data:{
-                                                    csrfmiddlewaretoken:"{{csrf_token}}",
-                                                    track_id:track.id
-                                                },
-                                                success:function(data){
-                                                    var result = {
-                                                        energy : data.energy,
-                                                        loudness : data.loudness
-                                                    }
-                                                    results.push(result)
-                                                    console.log(data.energy)
-                                                },
-                                                error:function(error){
-                                                    console.log(error)
-                                                }
-                                            });
-                                            // for features data retrival
-                                            
-                                        } // end for loop
-                                        var tracks_features = results
-                                        console.log("recommendations")
-                                        console.dir(recommendations)
-                                        console.log("target")
-                                        console.dir(target)
-                                        console.log("results: ")
-                                        console.log(results)
-                                        localStorage.setItem('recommendationsData', JSON.stringify(recommendations));
-                                        localStorage.setItem('featuresData', JSON.stringify(results));
-
-                                        // Finlly feeding all the required data to the model
-                                        //console.log(results)
-                                        $.ajax({
-                                            url:"filterout",
-                                            type:"GET",
-                                            dataType:"json",
-                                            data:{
-                                                f1 : jaruri_data,
-                                                f2 : target,
-                                                f3 : recommendations,
-                                                f4 : tracks_features,
-                                                csrfmiddlewaretoken:"{{csrf_token}}"
-                                            },
-                                            success:function(data){
-                                                console.log("Aage ki kahani model me... ;)"+data)
-                                            },
-                                            error:function(error){
-                                                console.log("Jaane nahiiii, denge tujheeee...")
-                                                console.dir(error)
-                                            }
-                                        });
-                                        
-                                    },
-                                    error:function(xhr,status,error){
-                                        console.log(error)
-                                    }
-                                });
-                            });
-                            */
                             
                             $("#songDropdown").on('change', function() {
                                 var [track_id, artist_id] = $("#songDropdown").val().split("+++");
@@ -441,7 +295,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Set up Typed.js
             var options = {
-                strings: ["", "Welcome to <b>DJ</b>ango's <b>Ai</b>gorithms", "Select a song", "And get playlist of simmilar songs generated by our AI model"],
+                strings: ["", "Welcome to <b>B</b>eat<b>B</b>uddy", "Select a song", "And get playlist of simmilar songs generated by our AI model"],
                 typeSpeed: 50, // typing speed in milliseconds
                 showCursor: true, // display cursor
                 cursorChar: '|', // cursor character

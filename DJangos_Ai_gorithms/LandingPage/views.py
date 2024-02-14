@@ -11,7 +11,7 @@ def index(request):
 def run_get_token(request):
     request.session['api__token'] = Call.get_token()
     return HttpResponseRedirect("/")
-    
+
 def run_get_song_details(request):
     query = request.POST.get('q')
     token = request.POST.get('token')
@@ -34,7 +34,7 @@ def run_get_features(request):
     # print("*******************************************", track_id, " ", access_token)
     result = Call.get_features(track_id=track_id, access_token=access_token)
     # print(result)
-    return JsonResponse(result,safe=False)
+    return JsonResponse(result)
 
 # def run_get_top10(request):
 #     f1 = json.loads(request.POST.get('f1'))
