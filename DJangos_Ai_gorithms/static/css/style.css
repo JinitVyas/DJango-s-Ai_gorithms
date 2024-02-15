@@ -38,3 +38,10 @@
 #songContainer>div>*{
     margin: 0 2vw ;
 }
+@media screen and (max-width: 520px)
+{
+    #songContainer > div, #targetDiv{
+        display: flex;
+        flex-direction:column !important;
+    }
+}
