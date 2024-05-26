@@ -1,0 +1,47 @@
+@keyframes moveRight {
+    0% {
+        transform: rotateY('0%');
+    }
+    
+    50%{
+        transform: rotateY('100%');
+        transform: translateX(0);
+    }
+}
+.animate-right {
+    animation: moveRight 1.5s ease-in-out infinite;
+    /* animation: moveRight 1s ease-in-out 1.5s forwards; */
+    /* 2s delay before animation starts */
+}
+
+#songContainer{
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    flex-direction: column;
+    padding: 2em;
+    background-color: black;
+    color: white;
+}
+
+#songContainer > div , #containerDiv {
+    background-color: black;
+    color: white;
+    border: solid white 2px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    width: 100%;
+    margin: 1vh;
+}
+#songContainer>div>*{
+    margin: 0 2vw ;
+}
+@media screen and (max-width: 520px)
+{
+    #songContainer > div, #targetDiv{
+        display: flex;
+        flex-direction:column !important;
+    }
+}
