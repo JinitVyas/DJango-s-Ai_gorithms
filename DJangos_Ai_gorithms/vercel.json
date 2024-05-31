@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "DJangos_Ai_gorithms/wsgi.py""
+      "dest": "DJangos_Ai_gorithms/wsgi.py"
     }
   ]
 }
