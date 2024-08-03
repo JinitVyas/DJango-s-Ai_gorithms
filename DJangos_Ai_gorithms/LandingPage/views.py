@@ -13,11 +13,13 @@ def run_get_token(request):
     return HttpResponseRedirect("/")
 
 def run_get_song_details(request):
+    print("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     query = request.POST.get('q')
     token = request.POST.get('token')
     track = Call.get_song_details(query, token)
     
     # return render(request, "index.html")
+    print(track)
     return JsonResponse(track)
 
 def run_get_recommendation(request):
@@ -60,4 +62,4 @@ def run_get_top10(request):
 
 def end(request):
     request.session.clear()
-    return render(request,"index.html")
+    return HttpResponseRedirect("/")

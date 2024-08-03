@@ -94,7 +94,7 @@
                         placeholder="Enter a song name" aria-describedby="helpId" />
                         <select id="songDropdown" class="form-control hide"></select>
                 </div>
-
+                {{request.session.api__token}}
                 {% if request.session.api__token %}
                     {% comment %} <p>API Token: {{ request.session.api__token }}</p> {% endcomment %}
                     <script>
@@ -105,7 +105,7 @@
                                 //alert("YO");
                                 const s_name = $("#txtsongs").val()
                                 $.ajax({
-                                    url:"find_Track",
+                                    url:"find_Track/",
                                     type:"POST",
                                     dataType:"json",
                                     data:{
@@ -167,7 +167,7 @@
                                 $('#bufferingAnimation').show();
 
                                 $.ajax({
-                                    url: "https://api.spotify.com/v1/tracks/" + track_id,
+                                    url: "https://api.spotify.com/v1/tracks/" + track_id + "/",
                                     type: "GET",
                                     dataType: "json",
                                     headers: {
@@ -189,7 +189,7 @@
                                         console.dir(target_track)
                                         // Fetch features of target track
                                         $.ajax({
-                                            url: "features",
+                                            url: "features/",
                                             type: "POST",
                                             dataType: "json",
                                             data: {
@@ -199,7 +199,7 @@
                                             success: function(target_data) {
                                                 // Fetch recommendations
                                                 $.ajax({
-                                                    url: "recommend",
+                                                    url: "recommend/",
                                                     type: "POST",
                                                     dataType: "json",
                                                     data: {
@@ -229,7 +229,7 @@
                                                         // Fetch features of recommended tracks
                                                         var promises = recommendations.map(function(track) {
                                                             return $.ajax({
-                                                                url: 'features',
+                                                                url: 'features/',
                                                                 type: 'POST',
                                                                 dataType: 'json',
                                                                 data: {
@@ -252,7 +252,7 @@
                                                             console.dir(tracks_features)
                                                             // Send data to Django view
                                                             $.ajax({
-                                                                url: "filterout",
+                                                                url: "filterout/",
                                                                 type: "POST",
                                                                 dataType: "json",
                                                                 data: {

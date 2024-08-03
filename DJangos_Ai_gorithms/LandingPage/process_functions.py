@@ -37,6 +37,7 @@ class Call:
             return ".env not found"
 
     def get_song_details(song_name, access_token):
+        print("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
         search_url = "https://api.spotify.com/v1/search/"
         parameters_of_query_string = {
             'q': song_name,
@@ -52,9 +53,10 @@ class Call:
             t_name = track_details["tracks"]["items"][0]["name"]
             artists = track_details["tracks"]["items"][0]["artists"]
             
-            # print(f"\n\n{t_id}\n<'{t_name}'> by <'{artists[0]['name']}'>")
+            print(f"\n\n{t_id}\n<'{t_name}'> by <'{artists[0]['name']}'>")
             return track_details
         else:
+            print("******************\n\n",result.status_code)
             return result.status_code
 
     def get_features(track_id, access_token):
